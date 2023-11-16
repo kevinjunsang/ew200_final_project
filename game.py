@@ -55,14 +55,18 @@ def draw_background():
     ))
     for i in range(SCREEN_WIDTH // GRASS_SIZE):
         background.blit(grass3, (
-            GRASS_SIZE * i, SCREEN_HEIGHT // 2 + 3 * GRASS_SIZE
+            GRASS_SIZE * i, GRASS_HEIGHT + GRASS_SIZE
+        ))
+    for i in range(3 * SCREEN_WIDTH // GRASS_SIZE // 4, SCREEN_WIDTH // GRASS_SIZE):
+        background.blit(grass3, (
+            GRASS_SIZE * i, RIGHT_TOP_HEIGHT + GRASS_SIZE
         ))
 
 
 draw_background()
 
 
-my_player = player.Player(SCREEN_WIDTH // 2)
+my_player = player.Player()
 screen.blit(background, (0, 0))
 pygame.display.flip()
 while True:
@@ -76,10 +80,20 @@ while True:
                 my_player.moving_left = True
             if event.key == pygame.K_RIGHT:
                 my_player.moving_right = True
-            if event.key == pygame.K_SPACE:
-                my_player.jump = True
             if event.key == pygame.K_j:
                 my_player.jump_strength = BUFF_JUMP
+            if event.key == pygame.K_d:
+                my_player.double_jump = 2
+            if event.key == pygame.K_SPACE:
+                if my_player.rect.top == my_player.bottom:
+                    my_player.jump_count = 0
+                if my_player.jump_count < my_player.double_jump:
+                    my_player.vertical_speed = my_player.jump_strength
+                    my_player.jump_count += 1
+            if event.key == pygame.K_DOWN:
+                if my_player.bottom < GRASS_HEIGHT:
+                    my_player.bottom = GRASS_HEIGHT
+                my_player.vertical_speed = 0
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 my_player.moving_left = False
