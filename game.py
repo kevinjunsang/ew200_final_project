@@ -76,6 +76,10 @@ while True:
                 my_player.moving_left = True
             if event.key == pygame.K_RIGHT:
                 my_player.moving_right = True
+            if event.key == pygame.K_SPACE:
+                my_player.jump = True
+            if event.key == pygame.K_j:
+                my_player.jump_strength = BUFF_JUMP
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 my_player.moving_left = False
