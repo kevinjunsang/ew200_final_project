@@ -23,12 +23,6 @@ class Player(pygame.sprite.Sprite):
         if self.rect.top <= self.bottom:
             self.rect.y -= self.vertical_speed
             self.vertical_speed -= 1
-            # if self.jump_count >= -self.jump_strength:
-            #     self.rect.y -= (self.jump_count * abs(self.jump_count)) * 0.25
-            #     self.jump_count -= 1
-            # else:
-            #     self.jump_count = self.jump_strength
-            #     self.jump = False
         if self.moving_left:
             self.rect.x -= 2
         elif self.moving_right:
@@ -43,8 +37,10 @@ class Player(pygame.sprite.Sprite):
             self.bottom = RIGHT_TOP_HEIGHT
         if self.rect.right < RIGHT_TOP_X_RANGE:
             self.bottom = GRASS_HEIGHT
+            # need to figure out how to make sure that when he falls off of the platform his initial velo is 0
         if self.rect.top > self.bottom:
             self.rect.top = self.bottom
+            self.vertical_speed = 0
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
