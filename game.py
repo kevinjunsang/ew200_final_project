@@ -1,6 +1,8 @@
 import pygame
 import sys
 import player
+import random
+from birds import Bird, Birds
 from settings import *
 
 pygame.init()
@@ -8,6 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 background = screen.copy()
+background2 = screen.copy()
 clock = pygame.time.Clock()
 
 
@@ -65,8 +68,13 @@ def draw_background():
 
 draw_background()
 
-
 my_player = player.Player()
+bird_1 = Bird(2 * TILE_SIZE, 2, True)
+bird_2 = Bird(4 * TILE_SIZE, 3, False)
+bird_3 = Bird(6 * TILE_SIZE, 4, True)
+Birds.add(bird_1)
+Birds.add(bird_2)
+Birds.add(bird_3)
 screen.blit(background, (0, 0))
 pygame.display.flip()
 while True:
@@ -101,7 +109,24 @@ while True:
                 my_player.moving_right = False
 
     my_player.update()
+    Birds.update()
+    # check for collisions
+    if pygame.sprite.spritecollide(my_player, Birds, True):
+        my_player.health -= 1
+    if bird_1 not in Birds:
+        Birds.add(bird_1)
+        bird_1.rect.x = SCREEN_WIDTH
+        bird_1.direction = random.randint(0,1)
+    if bird_2 not in Birds:
+        Birds.add(bird_2)
+        bird_2.rect.x = SCREEN_WIDTH
+        bird_2.direction = random.randint(0, 1)
+    if bird_3 not in Birds:
+        Birds.add(bird_3)
+        bird_3.rect.x = SCREEN_WIDTH
+        bird_3.direction = random.randint(0, 1)
     screen.blit(background, (0, 0))
     my_player.draw(screen)
+    Birds.draw(screen)
     pygame.display.flip()
     clock.tick(60)

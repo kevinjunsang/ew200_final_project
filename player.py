@@ -8,6 +8,15 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("assets/images/character.png").convert()
         self.image.set_colorkey(BLACK)
         self.image = pygame.transform.scale(self.image, PLAYER_SIZE)
+        self.full_heart = pygame.image.load("assets/images/full_heart.png").convert()
+        self.full_heart.set_colorkey(BLACK)
+        self.full_heart = pygame.transform.scale(self.full_heart, TILE_DIMENSIONS)
+        self.half_heart = pygame.image.load("assets/images/half_heart.png").convert()
+        self.half_heart.set_colorkey(BLACK)
+        self.half_heart = pygame.transform.scale(self.half_heart, TILE_DIMENSIONS)
+        self.empty_heart = pygame.image.load("assets/images/empty_heart.png").convert()
+        self.empty_heart.set_colorkey(BLACK)
+        self.empty_heart = pygame.transform.scale(self.empty_heart, TILE_DIMENSIONS)
         self.rect = pygame.rect.Rect(x, y, self.image.get_width(), self.image.get_height())
         self.moving_left = False
         self.moving_right = False
@@ -18,6 +27,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.health = 3
         self.bottom = GRASS_HEIGHT
+        self.health = 6
 
     def update(self):
         if self.rect.top <= self.bottom:
@@ -44,3 +54,31 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        if self.health == 6:
+            screen.blit(self.full_heart, HEART_1_POSITION)
+            screen.blit(self.full_heart, HEART_2_POSITION)
+            screen.blit(self.full_heart, HEART_3_POSITION)
+        if self.health == 5:
+            screen.blit(self.full_heart, HEART_1_POSITION)
+            screen.blit(self.full_heart, HEART_2_POSITION)
+            screen.blit(self.half_heart, HEART_3_POSITION)
+        if self.health == 4:
+            screen.blit(self.full_heart, HEART_1_POSITION)
+            screen.blit(self.full_heart, HEART_2_POSITION)
+            screen.blit(self.empty_heart, HEART_3_POSITION)
+        if self.health == 3:
+            screen.blit(self.full_heart, HEART_1_POSITION)
+            screen.blit(self.half_heart, HEART_2_POSITION)
+            screen.blit(self.empty_heart, HEART_3_POSITION)
+        if self.health == 2:
+            screen.blit(self.full_heart, HEART_1_POSITION)
+            screen.blit(self.empty_heart, HEART_2_POSITION)
+            screen.blit(self.empty_heart, HEART_3_POSITION)
+        if self.health == 1:
+            screen.blit(self.half_heart, HEART_1_POSITION)
+            screen.blit(self.empty_heart, HEART_2_POSITION)
+            screen.blit(self.empty_heart, HEART_3_POSITION)
+        if self.health <= 0:
+            screen.blit(self.empty_heart, HEART_1_POSITION)
+            screen.blit(self.empty_heart, HEART_2_POSITION)
+            screen.blit(self.empty_heart, HEART_3_POSITION)
