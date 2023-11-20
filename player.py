@@ -18,6 +18,10 @@ class Player(pygame.sprite.Sprite):
         self.empty_heart.set_colorkey(BLACK)
         self.empty_heart = pygame.transform.scale(self.empty_heart, TILE_DIMENSIONS)
         self.rect = pygame.rect.Rect(x, y, self.image.get_width(), self.image.get_height())
+        self.key = pygame.image.load("assets/images/key.png").convert()
+        self.key.set_colorkey(BLACK)
+        self.key = pygame.transform.scale(self.key, TILE_DIMENSIONS)
+        self.key_num = 0
         self.moving_left = False
         self.moving_right = False
         self.jump = False
@@ -25,7 +29,6 @@ class Player(pygame.sprite.Sprite):
         self.vertical_speed = 0
         self.double_jump = 1
         self.jump_count = 0
-        self.health = 3
         self.bottom = GRASS_HEIGHT
         self.health = 6
 
@@ -45,7 +48,13 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = SCREEN_WIDTH
         if self.rect.right > RIGHT_TOP_X_RANGE and self.rect.top < RIGHT_TOP_HEIGHT:
             self.bottom = RIGHT_TOP_HEIGHT
-        if self.rect.right < RIGHT_TOP_X_RANGE:
+        if MIDDLE_TOP_X_RANGE_LOW < self.rect.left < MIDDLE_TOP_X_RANGE_HI and self.rect.top < MIDDLE_TOP_HEIGHT:
+            self.bottom = MIDDLE_TOP_HEIGHT
+        if LEFT_TOP_X_RANGE_LOW < self.rect.left < LEFT_TOP_X_RANGE_HI and self.rect.top < LEFT_TOP_HEIGHT:
+            self.bottom = LEFT_TOP_HEIGHT
+        if MIDDLE_TOP_X_RANGE_HI < self.rect.left < RIGHT_TOP_X_RANGE - PLAYER_WIDTH:
+            self.bottom = GRASS_HEIGHT
+        if LEFT_TOP_X_RANGE_HI < self.rect.left < LEFT_TOP_X_RANGE_LOW - PLAYER_WIDTH:
             self.bottom = GRASS_HEIGHT
             # need to figure out how to make sure that when he falls off of the platform his initial velo is 0
         if self.rect.top > self.bottom:
@@ -54,6 +63,11 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        if self.key_num == 1:
+            screen.blit(self.key, KEY_1_POSITION)
+        if self.key_num == 2:
+            screen.blit(self.key, KEY_1_POSITION)
+            screen.blit(self.key, KEY_2_POSITION)
         if self.health == 6:
             screen.blit(self.full_heart, HEART_1_POSITION)
             screen.blit(self.full_heart, HEART_2_POSITION)
