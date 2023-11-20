@@ -22,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.key.set_colorkey(BLACK)
         self.key = pygame.transform.scale(self.key, TILE_DIMENSIONS)
         self.key_num = 0
+        self.collected_keys = 0
         self.moving_left = False
         self.moving_right = False
         self.jump = False
@@ -46,15 +47,20 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
+        # first barrier
         if self.rect.right > RIGHT_TOP_X_RANGE and self.rect.top < RIGHT_TOP_HEIGHT:
             self.bottom = RIGHT_TOP_HEIGHT
+        # second barrier
         if MIDDLE_TOP_X_RANGE_LOW < self.rect.left < MIDDLE_TOP_X_RANGE_HI and self.rect.top < MIDDLE_TOP_HEIGHT:
             self.bottom = MIDDLE_TOP_HEIGHT
+        # third barrier
         if LEFT_TOP_X_RANGE_LOW < self.rect.left < LEFT_TOP_X_RANGE_HI and self.rect.top < LEFT_TOP_HEIGHT:
             self.bottom = LEFT_TOP_HEIGHT
+        # in between right and middle barrier
         if MIDDLE_TOP_X_RANGE_HI < self.rect.left < RIGHT_TOP_X_RANGE - PLAYER_WIDTH:
             self.bottom = GRASS_HEIGHT
-        if LEFT_TOP_X_RANGE_HI < self.rect.left < LEFT_TOP_X_RANGE_LOW - PLAYER_WIDTH:
+        # in between left and right barrier
+        if LEFT_TOP_X_RANGE_HI < self.rect.left < MIDDLE_TOP_X_RANGE_LOW - PLAYER_WIDTH:
             self.bottom = GRASS_HEIGHT
             # need to figure out how to make sure that when he falls off of the platform his initial velo is 0
         if self.rect.top > self.bottom:

@@ -163,9 +163,10 @@ while my_player.health > 0 or my_ghost.revive is True:
     # check for collisions
     if pygame.sprite.spritecollide(my_player, Birds, True):
         my_player.health -= 1
-    if my_player.key_num < 2:
+    if my_player.collected_keys < 2:
         if pygame.sprite.spritecollide(my_player, Keys, True):
             my_player.key_num += 1
+            my_player.collected_keys += 1
     if pygame.sprite.spritecollide(my_ghost, Keys, True):
         my_ghost.key_num += 1
     if bird_1 not in Birds:
