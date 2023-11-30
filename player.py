@@ -5,7 +5,7 @@ from settings import *
 class Player(pygame.sprite.Sprite):
     def __init__(self, x=SCREEN_WIDTH // 2, y=GRASS_HEIGHT):
         super().__init__()
-        self.right_image = pygame.image.load("assets/images/character.png").convert()
+        self.right_image = pygame.image.load("assets/images/character_1.png").convert()
         self.right_image.set_colorkey(BLACK)
         self.right_image = pygame.transform.scale(self.right_image, PLAYER_SIZE)
         self.image = self.right_image
@@ -42,10 +42,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.y -= self.vertical_speed
             self.vertical_speed -= 1
         if self.moving_left:
-            self.rect.x -= 2
+            self.rect.x -= 3
             self.image = self.right_image
         elif self.moving_right:
-            self.rect.x += 2
+            self.rect.x += 3
             self.image = self.left_image
 
         # make sure the player is in a valid position
