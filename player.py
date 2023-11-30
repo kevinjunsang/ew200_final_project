@@ -5,9 +5,11 @@ from settings import *
 class Player(pygame.sprite.Sprite):
     def __init__(self, x=SCREEN_WIDTH // 2, y=GRASS_HEIGHT):
         super().__init__()
-        self.image = pygame.image.load("assets/images/character.png").convert()
-        self.image.set_colorkey(BLACK)
-        self.image = pygame.transform.scale(self.image, PLAYER_SIZE)
+        self.right_image = pygame.image.load("assets/images/character.png").convert()
+        self.right_image.set_colorkey(BLACK)
+        self.right_image = pygame.transform.scale(self.right_image, PLAYER_SIZE)
+        self.image = self.right_image
+        self.left_image = pygame.transform.flip(self.right_image, True, False)
         self.full_heart = pygame.image.load("assets/images/full_heart.png").convert()
         self.full_heart.set_colorkey(BLACK)
         self.full_heart = pygame.transform.scale(self.full_heart, TILE_DIMENSIONS)
@@ -32,6 +34,8 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.bottom = GRASS_HEIGHT
         self.health = 6
+        self.score = 0
+        self.is_hit = False
 
     def update(self):
         if self.rect.top <= self.bottom:
@@ -39,8 +43,10 @@ class Player(pygame.sprite.Sprite):
             self.vertical_speed -= 1
         if self.moving_left:
             self.rect.x -= 2
+            self.image = self.right_image
         elif self.moving_right:
             self.rect.x += 2
+            self.image = self.left_image
 
         # make sure the player is in a valid position
         if self.rect.left < 0:
@@ -56,13 +62,16 @@ class Player(pygame.sprite.Sprite):
         # third barrier
         if LEFT_TOP_X_RANGE_LOW < self.rect.left < LEFT_TOP_X_RANGE_HI and self.rect.top < LEFT_TOP_HEIGHT:
             self.bottom = LEFT_TOP_HEIGHT
+            self.score += 1
         # in between right and middle barrier
         if MIDDLE_TOP_X_RANGE_HI < self.rect.left < RIGHT_TOP_X_RANGE - PLAYER_WIDTH:
             self.bottom = GRASS_HEIGHT
         # in between left and right barrier
         if LEFT_TOP_X_RANGE_HI < self.rect.left < MIDDLE_TOP_X_RANGE_LOW - PLAYER_WIDTH:
             self.bottom = GRASS_HEIGHT
-            # need to figure out how to make sure that when he falls off of the platform his initial velo is 0
+        # need to figure out how to make sure that when he falls off of the platform his initial velo is 0
+        if self.rect.left < LEFT_TOP_X_RANGE_LOW:
+            self.bottom = GRASS_HEIGHT
         if self.rect.top > self.bottom:
             self.rect.top = self.bottom
             self.vertical_speed = 0
@@ -102,3 +111,6 @@ class Player(pygame.sprite.Sprite):
             screen.blit(self.empty_heart, HEART_1_POSITION)
             screen.blit(self.empty_heart, HEART_2_POSITION)
             screen.blit(self.empty_heart, HEART_3_POSITION)
+
+
+Players = pygame.sprite.Group()

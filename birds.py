@@ -1,11 +1,11 @@
 import pygame
-import random
 import math
+import random
 from settings import *
 
 
 class Bird(pygame.sprite.Sprite):
-    def __init__(self, y, speed, direction, x=SCREEN_WIDTH):
+    def __init__(self, y, speed, direction, amplitude, x=SCREEN_WIDTH):
         super().__init__()
         self.image_1 = pygame.image.load("assets/images/bird1.png").convert()
         self.image_1.set_colorkey(BLACK)
@@ -30,6 +30,7 @@ class Bird(pygame.sprite.Sprite):
             self.images.append(self.image_2)
         self.image_counter = 0
         self.image = self.images[self.image_counter]
+        self.amplitude = amplitude
 
     def update(self):
         self.image_counter += 1
@@ -39,13 +40,15 @@ class Bird(pygame.sprite.Sprite):
         elif self.moving_left:
             self.rect.x -= self.speed
         self.angle_counter += math.pi / 60
-        self.rect.y = self.height + TILE_SIZE * math.sin(self.angle_counter)
+        self.rect.y = self.height + TILE_SIZE * self.amplitude * math.sin(self.angle_counter)
 
         # make sure this puts the bird in a valid position
         if self.rect.x > SCREEN_WIDTH:
             self.rect.x = -self.image.get_width()
+            self.speed = random.randint(2, 6)
         elif self.rect.x < -self.image.get_width():
             self.rect.x = SCREEN_WIDTH
+            self.speed = random.randint(2, 6)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

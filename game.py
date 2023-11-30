@@ -10,10 +10,11 @@ from settings import *
 
 pygame.init()
 
+game_font = pygame.font.Font("assets/fonts/Black_Crayon.ttf", 24)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+player_num = 1
 
 background = screen.copy()
-background2 = screen.copy()
 clock = pygame.time.Clock()
 
 
@@ -78,6 +79,15 @@ def draw_background():
 
 
 draw_background()
+menu = background.copy()
+
+
+def draw_menu():
+    player_text = game_font.render("Press 1 for single player and 2 for multiplayer", True, BLACK)
+    menu.blit(player_text, (SCREEN_WIDTH // 2 - player_text.get_width() // 2, GRASS_SIZE))
+
+
+draw_menu()
 
 my_player = Player()
 my_ghost = Ghost()
@@ -87,15 +97,30 @@ key_3 = Key(SCREEN_WIDTH - 2 * TILE_SIZE, RIGHT_TOP_HEIGHT)
 Keys.add(key_1)
 Keys.add(key_2)
 Keys.add(key_3)
-bird_1 = Bird(2 * TILE_SIZE, 2, True)
-bird_2 = Bird(4 * TILE_SIZE, 3, False)
-bird_3 = Bird(6 * TILE_SIZE, 4, True)
+bird_1 = Bird(2 * TILE_SIZE, 2, True, 3)
+bird_2 = Bird(4 * TILE_SIZE, 3, False, 2)
+bird_3 = Bird(6 * TILE_SIZE, 4, True, 1)
 Birds.add(bird_1)
 Birds.add(bird_2)
 Birds.add(bird_3)
 box_jump = Box(SCREEN_WIDTH // 2, MIDDLE_TOP_HEIGHT, 1)
 box_double = Box(SCREEN_WIDTH // 2 + 3 * TILE_SIZE, MIDDLE_TOP_HEIGHT, 2)
 box_revive = Box(SCREEN_WIDTH // 2 + 6 * TILE_SIZE, MIDDLE_TOP_HEIGHT, 3)
+menu_running = True
+while menu_running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                player_num = 1
+                menu_running = False
+            if event.key == pygame.K_2:
+                player_num = 2
+                menu_running = False
+    screen.blit(menu, (0, 0))
+    pygame.display.flip()
 screen.blit(background, (0, 0))
 pygame.display.flip()
 while my_player.health > 0 or my_ghost.revive is True:
@@ -117,7 +142,7 @@ while my_player.health > 0 or my_ghost.revive is True:
                     if pygame.Rect.colliderect(my_player.rect, box_double.rect) and my_player.key_num > 0:
                         my_player.double_jump = 2
                         my_player.key_num -= 1
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_UP:
                     if my_player.rect.top == my_player.bottom:
                         my_player.jump_count = 0
                     if my_player.jump_count < my_player.double_jump:
@@ -161,26 +186,29 @@ while my_player.health > 0 or my_ghost.revive is True:
     my_ghost.update()
     Birds.update()
     # check for collisions
-    if pygame.sprite.spritecollide(my_player, Birds, True):
-        my_player.health -= 1
+    if pygame.sprite.spritecollide(my_player, Birds, False):
+        my_player.is_hit = True
     if my_player.collected_keys < 2:
         if pygame.sprite.spritecollide(my_player, Keys, True):
             my_player.key_num += 1
             my_player.collected_keys += 1
     if pygame.sprite.spritecollide(my_ghost, Keys, True):
         my_ghost.key_num += 1
-    if bird_1 not in Birds:
-        Birds.add(bird_1)
-        bird_1.rect.x = SCREEN_WIDTH
-        bird_1.direction = random.randint(0,1)
-    if bird_2 not in Birds:
-        Birds.add(bird_2)
-        bird_2.rect.x = SCREEN_WIDTH
-        bird_2.direction = random.randint(0, 1)
-    if bird_3 not in Birds:
-        Birds.add(bird_3)
-        bird_3.rect.x = SCREEN_WIDTH
-        bird_3.direction = random.randint(0, 1)
+    # if bird_1 not in Birds:
+    #     Birds.add(bird_1)
+    #     bird_1.rect.x = SCREEN_WIDTH
+    #     bird_1.direction = random.randint(0, 1)
+    #     bird_1.speed = random.randint(2, 6)
+    # if bird_2 not in Birds:
+    #     Birds.add(bird_2)
+    #     bird_2.rect.x = SCREEN_WIDTH
+    #     bird_2.direction = random.randint(0, 1)
+    #     bird_2.speed = random.randint(2, 6)
+    # if bird_3 not in Birds:
+    #     Birds.add(bird_3)
+    #     bird_3.rect.x = SCREEN_WIDTH
+    #     bird_3.direction = random.randint(0, 1)
+    #     bird_3.speed = random.randint(2, 6)
     screen.blit(background, (0, 0))
     Keys.draw(screen)
     box_jump.draw(screen)
@@ -191,5 +219,7 @@ while my_player.health > 0 or my_ghost.revive is True:
     else:
         my_ghost.draw(screen)
     Birds.draw(screen)
+    text = game_font.render(f"{my_player.score // 6}", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH - 2 * text.get_width(), 2 * TILE_SIZE))
     pygame.display.flip()
     clock.tick(60)
