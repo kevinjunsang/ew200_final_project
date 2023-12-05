@@ -1,13 +1,15 @@
 import pygame
 import sys
 import time
-from player import Player
+from player import Player, Players
 from ghost import Ghost
 import random
 from birds import Bird, Birds
 from key import Key, Keys
 from wand import Wand, Wands
 from sword import Sword, Swords
+from bullet1 import Bullet1, Bullets1
+from bullet2 import Bullet2, Bullets2
 from box import Box
 from cyclops import Cyclops, Enemies
 from settings import *
@@ -109,6 +111,7 @@ my_player = Player(SCREEN_WIDTH - 3 * PLAYER_WIDTH, 'character_1')
 my_ghost = Ghost(SCREEN_WIDTH - 3 * PLAYER_WIDTH)
 ur_player = Player(4 * PLAYER_WIDTH, 'character_2')
 ur_ghost = Ghost(4 * PLAYER_WIDTH)
+Players.add(ur_player)
 for key_pos in KEY_POSITIONS:
     Keys.add(Key(key_pos[0], key_pos[1]))
 for wand_pos in WAND_POSITIONS:
@@ -131,6 +134,7 @@ Enemies.add(Cyclops_1)
 Enemies.add(Cyclops_2)
 Enemies.add(Cyclops_3)
 menu_running = True
+tick_num = 0
 while menu_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -173,6 +177,12 @@ while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or
                     if my_player.bottom < GRASS_HEIGHT:
                         my_player.bottom = GRASS_HEIGHT
                     my_player.vertical_speed = 0
+                if my_player.wand_count > 0:
+                    if event.key == pygame.K_RCTRL:
+                        Bullet_1 = Bullet1(my_player.rect.centerx, my_player.rect.top)
+                        Bullets1.add(Bullet_1)
+                        Bullet_1.get_direction(my_player, ur_player)
+                        my_player.wand_count -= 1
             else:
                 if event.key == pygame.K_RETURN:
                     if pygame.Rect.colliderect(my_ghost.rect, box_revive.rect) and my_ghost.key_num > 0:
@@ -212,6 +222,12 @@ while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or
                     if ur_player.bottom < GRASS_HEIGHT:
                         ur_player.bottom = GRASS_HEIGHT
                     ur_player.vertical_speed = 0
+                if ur_player.wand_count > 0:
+                    if event.key == pygame.K_f:
+                        Bullet_2 = Bullet2(ur_player.rect.centerx, ur_player.rect.top)
+                        Bullets2.add(Bullet_2)
+                        Bullet_2.get_direction(ur_player, my_player)
+                        ur_player.wand_count -= 1
             else:
                 if event.key == pygame.K_CAPSLOCK:
                     if pygame.Rect.colliderect(ur_ghost.rect, box_revive.rect) and ur_ghost.key_num > 0:
@@ -256,12 +272,15 @@ while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or
                 if event.key == pygame.K_s:
                     ur_ghost.moving_down = False
     ur_player.update()
+    ur_ghost.update()
     my_player.update()
     my_ghost.update()
     Birds.update()
     Enemies.update()
     Wands.update()
     Swords.update()
+    Bullets1.update()
+    Bullets2.update()
     # check for collisions
     if pygame.sprite.spritecollide(my_player, Birds, True):
         my_player.health -= 1
@@ -297,7 +316,18 @@ while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or
         ur_player.have_sword = True
     if pygame.sprite.spritecollide(ur_ghost, Keys, True):
         ur_ghost.key_num += 1
-    screen.blit(background, (0, 0))
+    if COOLDOWN - tick_num < 0:
+        if pygame.sprite.spritecollide(my_player, Players, False):
+            if my_player.have_sword:
+                ur_player.health -= 1
+            if ur_player.have_sword:
+                my_player.health -= 1
+            tick_num = 0
+    if pygame.sprite.spritecollide(my_player, Bullets2, True):
+        my_player.health -= 1
+    if pygame.sprite.spritecollide(ur_player, Bullets1, True):
+        ur_player.health -= 1
+    screen.blit(background, (0,0))
     Keys.draw(screen)
     box_jump.draw(screen)
     box_double.draw(screen)
@@ -305,14 +335,23 @@ while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or
     Enemies.draw(screen)
     Wands.draw(screen)
     Swords.draw(screen)
+    Bullets1.draw(screen)
+    Bullets2.draw(screen)
     if my_player.health > 0:
         my_player.draw(screen, "MY_PLAYER")
     else:
-        my_ghost.draw(screen)
+        my_ghost.draw(screen, "MY_PLAYER")
     if ur_player.health > 0:
         ur_player.draw(screen, "UR_PLAYER")
     else:
-        ur_ghost.draw(screen)
+        ur_ghost.draw(screen, "UR_PLAYER")
     Birds.draw(screen)
+    if COOLDOWN - tick_num > 0:
+        text = game_font.render(f"{COOLDOWN - tick_num}", True, BLACK)
+        screen.blit(text, (SCREEN_WIDTH - 2 * text.get_width(), 2 * TILE_SIZE))
+    else:
+        text = game_font.render("You can take damage", True, BLACK)
+        screen.blit(text, (SCREEN_WIDTH - 2 * text.get_width(), 2 * TILE_SIZE))
     pygame.display.flip()
+    tick_num += 1
     clock.tick(60)

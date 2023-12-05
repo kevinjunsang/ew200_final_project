@@ -41,6 +41,7 @@ class Player(pygame.sprite.Sprite):
         self.jump = False
         self.have_sword = False
         self.wand_count = 0
+        self.speed = 3
 
     def update(self):
         if self.jump is True or self.rect.top < self.bottom:
@@ -49,10 +50,10 @@ class Player(pygame.sprite.Sprite):
         else:
             self.jump = False
         if self.moving_left:
-            self.rect.x -= 3
+            self.rect.x -= self.speed
             self.image = self.right_image
         elif self.moving_right:
-            self.rect.x += 3
+            self.rect.x += self.speed
             self.image = self.left_image
 
         # make sure the player is in a valid position

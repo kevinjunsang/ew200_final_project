@@ -39,7 +39,11 @@ class Ghost(pygame.sprite.Sprite):
         if self.rect.bottom > SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
 
-    def draw(self, screen):
+    def draw(self, screen, player):
         screen.blit(self.image, self.rect)
-        if self.key_num == 1:
-            screen.blit(self.key, KEY_3_POSITION)
+        if player == "MY_PLAYER":
+            if self.key_num == 1:
+                screen.blit(self.key, MY_KEY_3_POSITION)
+        if player == "UR_PLAYER":
+            if self.key_num == 1:
+                screen.blit(self.key, UR_KEY_3_POSITION)
