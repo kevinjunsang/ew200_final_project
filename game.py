@@ -6,6 +6,8 @@ from ghost import Ghost
 import random
 from birds import Bird, Birds
 from key import Key, Keys
+from wand import Wand, Wands
+from sword import Sword, Swords
 from box import Box
 from cyclops import Cyclops, Enemies
 from settings import *
@@ -66,15 +68,23 @@ def draw_background():
         ))
     for i in range(RIGHT_TOP_X_RANGE // GRASS_SIZE, SCREEN_WIDTH // GRASS_SIZE):
         background.blit(grass3, (
-            GRASS_SIZE * i, RIGHT_TOP_HEIGHT + GRASS_SIZE
+            GRASS_SIZE * i, HIGH_TOP_HEIGHT + GRASS_SIZE
+        ))
+    for i in range(0, LEFT_TOP_X_RANGE // GRASS_SIZE):
+        background.blit(grass3, (
+            GRASS_SIZE * i, HIGH_TOP_HEIGHT + GRASS_SIZE
         ))
     for i in range(MIDDLE_TOP_X_RANGE_LOW // GRASS_SIZE, MIDDLE_TOP_X_RANGE_HI // GRASS_SIZE):
         background.blit(grass3, (
+            GRASS_SIZE * i, LOW_TOP_HEIGHT + GRASS_SIZE
+        ))
+    for i in range(LEFT_MID_X_RANGE_LOW // GRASS_SIZE, LEFT_MID_X_RANGE_HI // GRASS_SIZE):
+        background.blit(grass3, (
             GRASS_SIZE * i, MIDDLE_TOP_HEIGHT + GRASS_SIZE
         ))
-    for i in range(LEFT_TOP_X_RANGE_LOW // GRASS_SIZE, LEFT_TOP_X_RANGE_HI // GRASS_SIZE):
+    for i in range(RIGHT_MID_X_RANGE_LOW // GRASS_SIZE, RIGHT_MID_X_RANGE_HI // GRASS_SIZE):
         background.blit(grass3, (
-            GRASS_SIZE * i, LEFT_TOP_HEIGHT + GRASS_SIZE
+            GRASS_SIZE * i, MIDDLE_TOP_HEIGHT + GRASS_SIZE
         ))
 
 
@@ -95,26 +105,28 @@ def draw_menu():
 
 draw_menu()
 
-my_player = Player()
-my_ghost = Ghost()
-key_1 = Key(2 * TILE_SIZE, GRASS_HEIGHT)
-key_2 = Key(6 * TILE_SIZE, GRASS_HEIGHT)
-key_3 = Key(SCREEN_WIDTH - 2 * TILE_SIZE, RIGHT_TOP_HEIGHT)
-Keys.add(key_1)
-Keys.add(key_2)
-Keys.add(key_3)
+my_player = Player(SCREEN_WIDTH - 3 * PLAYER_WIDTH, 'character_1')
+my_ghost = Ghost(SCREEN_WIDTH - 3 * PLAYER_WIDTH)
+ur_player = Player(4 * PLAYER_WIDTH, 'character_2')
+ur_ghost = Ghost(4 * PLAYER_WIDTH)
+for key_pos in KEY_POSITIONS:
+    Keys.add(Key(key_pos[0], key_pos[1]))
+for wand_pos in WAND_POSITIONS:
+    Wands.add(Wand(wand_pos[0], wand_pos[1]))
+for sword_pos in SWORD_POSITIONS:
+    Swords.add(Sword(sword_pos[0], sword_pos[1]))
 bird_1 = Bird(2 * TILE_SIZE, 2, True, 3)
 bird_2 = Bird(4 * TILE_SIZE, 3, False, 2)
 bird_3 = Bird(6 * TILE_SIZE, 4, True, 1)
 Birds.add(bird_1)
 Birds.add(bird_2)
 Birds.add(bird_3)
-box_jump = Box(SCREEN_WIDTH // 2, MIDDLE_TOP_HEIGHT, 1)
-box_double = Box(SCREEN_WIDTH // 2 + 3 * TILE_SIZE, MIDDLE_TOP_HEIGHT, 2)
-box_revive = Box(SCREEN_WIDTH // 2 + 6 * TILE_SIZE, MIDDLE_TOP_HEIGHT, 3)
-Cyclops_1 = Cyclops(0, GRASS_HEIGHT, (0, SCREEN_WIDTH))
-Cyclops_2 = Cyclops(SCREEN_WIDTH - PLAYER_WIDTH, RIGHT_TOP_HEIGHT, (RIGHT_TOP_X_RANGE, SCREEN_WIDTH))
-Cyclops_3 = Cyclops(LEFT_TOP_X_RANGE_HI - PLAYER_WIDTH, LEFT_TOP_HEIGHT, (LEFT_TOP_X_RANGE_LOW, LEFT_TOP_X_RANGE_HI))
+box_jump = Box(SCREEN_WIDTH // 2 - 3 * TILE_SIZE, LOW_TOP_HEIGHT, 1)
+box_double = Box(SCREEN_WIDTH // 2 - TILE_SIZE // 2, LOW_TOP_HEIGHT, 2)
+box_revive = Box(SCREEN_WIDTH // 2 + 2 * TILE_SIZE, LOW_TOP_HEIGHT, 3)
+Cyclops_1 = Cyclops(SCREEN_WIDTH // 2, GRASS_HEIGHT, (0, SCREEN_WIDTH))
+Cyclops_2 = Cyclops(0, HIGH_TOP_HEIGHT, (0, LEFT_TOP_X_RANGE))
+Cyclops_3 = Cyclops(SCREEN_WIDTH - PLAYER_WIDTH, HIGH_TOP_HEIGHT, (RIGHT_TOP_X_RANGE, SCREEN_WIDTH))
 Enemies.add(Cyclops_1)
 Enemies.add(Cyclops_2)
 Enemies.add(Cyclops_3)
@@ -131,7 +143,7 @@ while menu_running:
     pygame.display.flip()
 screen.blit(background, (0, 0))
 pygame.display.flip()
-while my_player.health > 0 or my_ghost.revive is True:
+while my_player.health > 0 or my_ghost.revive is True or ur_player.health > 0 or ur_ghost.revive is True:
     # listen for events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -144,13 +156,14 @@ while my_player.health > 0 or my_ghost.revive is True:
                 if event.key == pygame.K_RIGHT:
                     my_player.moving_right = True
                 if event.key == pygame.K_RETURN:
-                    if pygame.Rect.colliderect(my_player.rect, box_jump.rect) and my_player.key_num > 0:
+                    if pygame.Rect.colliderect(my_player.rect, box_jump.rect) and my_player.key_num > 0 and my_player.jump_strength != BUFF_JUMP:
                         my_player.jump_strength = BUFF_JUMP
                         my_player.key_num -= 1
-                    if pygame.Rect.colliderect(my_player.rect, box_double.rect) and my_player.key_num > 0:
+                    if pygame.Rect.colliderect(my_player.rect, box_double.rect) and my_player.key_num > 0 and my_player.double_jump == 1:
                         my_player.double_jump = 2
                         my_player.key_num -= 1
                 if event.key == pygame.K_UP:
+                    my_player.jump = True
                     if my_player.rect.top == my_player.bottom:
                         my_player.jump_count = 0
                     if my_player.jump_count < my_player.double_jump:
@@ -174,6 +187,45 @@ while my_player.health > 0 or my_ghost.revive is True:
                     my_ghost.moving_up = True
                 if event.key == pygame.K_DOWN:
                     my_ghost.moving_down = True
+            if ur_player.health > 0:
+                if event.key == pygame.K_a:
+                    ur_player.moving_left = True
+                if event.key == pygame.K_d:
+                    ur_player.moving_right = True
+                if event.key == pygame.K_CAPSLOCK:
+                    if pygame.Rect.colliderect(ur_player.rect,
+                                               box_jump.rect) and ur_player.key_num > 0 and ur_player.jump_strength != BUFF_JUMP:
+                        ur_player.jump_strength = BUFF_JUMP
+                        ur_player.key_num -= 1
+                    if pygame.Rect.colliderect(ur_player.rect,
+                                               box_double.rect) and ur_player.key_num > 0 and ur_player.double_jump == 1:
+                        ur_player.double_jump = 2
+                        ur_player.key_num -= 1
+                if event.key == pygame.K_w:
+                    ur_player.jump = True
+                    if ur_player.rect.top == ur_player.bottom:
+                        ur_player.jump_count = 0
+                    if ur_player.jump_count < ur_player.double_jump:
+                        ur_player.vertical_speed = ur_player.jump_strength
+                        ur_player.jump_count += 1
+                if event.key == pygame.K_s:
+                    if ur_player.bottom < GRASS_HEIGHT:
+                        ur_player.bottom = GRASS_HEIGHT
+                    ur_player.vertical_speed = 0
+            else:
+                if event.key == pygame.K_CAPSLOCK:
+                    if pygame.Rect.colliderect(ur_ghost.rect, box_revive.rect) and ur_ghost.key_num > 0:
+                        ur_player.health = 6
+                        ur_ghost.revive = False
+                        ur_ghost.key_num = 0
+                if event.key == pygame.K_a:
+                    ur_ghost.moving_left = True
+                if event.key == pygame.K_d:
+                    ur_ghost.moving_right = True
+                if event.key == pygame.K_w:
+                    ur_ghost.moving_up = True
+                if event.key == pygame.K_s:
+                    ur_ghost.moving_down = True
         elif event.type == pygame.KEYUP:
             if my_player.health > 0:
                 if event.key == pygame.K_LEFT:
@@ -189,11 +241,27 @@ while my_player.health > 0 or my_ghost.revive is True:
                     my_ghost.moving_up = False
                 if event.key == pygame.K_DOWN:
                     my_ghost.moving_down = False
-
+            if ur_player.health > 0:
+                if event.key == pygame.K_a:
+                    ur_player.moving_left = False
+                if event.key == pygame.K_d:
+                    ur_player.moving_right = False
+            else:
+                if event.key == pygame.K_a:
+                    ur_ghost.moving_left = False
+                if event.key == pygame.K_d:
+                    ur_ghost.moving_right = False
+                if event.key == pygame.K_w:
+                    ur_ghost.moving_up = False
+                if event.key == pygame.K_s:
+                    ur_ghost.moving_down = False
+    ur_player.update()
     my_player.update()
     my_ghost.update()
     Birds.update()
     Enemies.update()
+    Wands.update()
+    Swords.update()
     # check for collisions
     if pygame.sprite.spritecollide(my_player, Birds, True):
         my_player.health -= 1
@@ -203,35 +271,48 @@ while my_player.health > 0 or my_ghost.revive is True:
         if pygame.sprite.spritecollide(my_player, Keys, True):
             my_player.key_num += 1
             my_player.collected_keys += 1
+    if pygame.sprite.spritecollide(my_player, Wands, True):
+        my_player.wand_count = 3
+        if len(Wands) == 0:
+            for wand_pos in WAND_POSITIONS:
+                Wands.add(Wand(wand_pos[0], wand_pos[1]))
+    if pygame.sprite.spritecollide(my_player, Swords, True):
+        my_player.have_sword = True
     if pygame.sprite.spritecollide(my_ghost, Keys, True):
         my_ghost.key_num += 1
-    if bird_1 not in Birds:
-        Birds.add(bird_1)
-        bird_1.rect.x = SCREEN_WIDTH
-        bird_1.direction = random.randint(0, 1)
-        bird_1.speed = random.randint(2, 6)
-    if bird_2 not in Birds:
-        Birds.add(bird_2)
-        bird_2.rect.x = SCREEN_WIDTH
-        bird_2.direction = random.randint(0, 1)
-        bird_2.speed = random.randint(2, 6)
-    if bird_3 not in Birds:
-        Birds.add(bird_3)
-        bird_3.rect.x = SCREEN_WIDTH
-        bird_3.direction = random.randint(0, 1)
-        bird_3.speed = random.randint(2, 6)
+    if pygame.sprite.spritecollide(ur_player, Birds, True):
+        ur_player.health -= 1
+    if pygame.sprite.spritecollide(ur_player, Enemies, True):
+        ur_player.health -= 1
+    if ur_player.collected_keys < 2:
+        if pygame.sprite.spritecollide(ur_player, Keys, True):
+            ur_player.key_num += 1
+            ur_player.collected_keys += 1
+    if pygame.sprite.spritecollide(ur_player, Wands, True):
+        ur_player.wand_count = 3
+        if len(Wands) == 0:
+            for wand_pos in WAND_POSITIONS:
+                Wands.add(Wand(wand_pos[0], wand_pos[1]))
+    if pygame.sprite.spritecollide(ur_player, Swords, True):
+        ur_player.have_sword = True
+    if pygame.sprite.spritecollide(ur_ghost, Keys, True):
+        ur_ghost.key_num += 1
     screen.blit(background, (0, 0))
     Keys.draw(screen)
     box_jump.draw(screen)
     box_double.draw(screen)
     box_revive.draw(screen)
     Enemies.draw(screen)
+    Wands.draw(screen)
+    Swords.draw(screen)
     if my_player.health > 0:
-        my_player.draw(screen)
+        my_player.draw(screen, "MY_PLAYER")
     else:
         my_ghost.draw(screen)
+    if ur_player.health > 0:
+        ur_player.draw(screen, "UR_PLAYER")
+    else:
+        ur_ghost.draw(screen)
     Birds.draw(screen)
-    text = game_font.render(f"{my_player.score // 6}", True, BLACK)
-    screen.blit(text, (SCREEN_WIDTH - 2 * text.get_width(), 2 * TILE_SIZE))
     pygame.display.flip()
     clock.tick(60)

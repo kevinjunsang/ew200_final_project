@@ -3,7 +3,7 @@ from settings import *
 
 
 class Ghost(pygame.sprite.Sprite):
-    def __init__(self, x=SCREEN_WIDTH // 2, y=GRASS_HEIGHT):
+    def __init__(self, x, y=GRASS_HEIGHT):
         super().__init__()
         self.image = pygame.image.load("assets/images/ghost.png").convert()
         self.image.set_colorkey(BLACK)
